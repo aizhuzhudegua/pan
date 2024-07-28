@@ -15,6 +15,12 @@ public:
 
     static MyTcpServer& getInstance();
 
+    // 转发
+    void resend(const char *pername,const PDU* pdu);
+
+public slots:
+    void deleteSocket(MyTcpSocket *mysocket);
+
 private:
     QList<MyTcpSocket*> m_tcpSocketList;
 };

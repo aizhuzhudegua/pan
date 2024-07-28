@@ -20,8 +20,9 @@ sqlite3 ./cloud.db
 
 ```sqlite
 sqlite> create table usrInfo(id integer primary key autoincrement,
-   ...> name varchar(32),
-   ...> pwd varchar(32));
+   ...> name varchar(32) unique,
+   ...> pwd varchar(32),
+   ...> online integer default 0);
 ```
 
 ### ![image-20240723153430756](images/image-20240723153430756.png)
@@ -47,6 +48,10 @@ sqlite> create table friendInfo(id integer not null,
 ```
 
 ![image-20240723153850097](images/image-20240723153850097.png)
+
+### 1.4 数据库连接
+
+![image-20240725175628553](images/image-20240725175628553.png) 
 
 ## 2 客户端
 
@@ -92,6 +97,20 @@ sqlite> create table friendInfo(id integer not null,
 
 ![image-20240725104429221](images/image-20240725104429221.png)
 
+![image-20240725163819613](images/image-20240725163819613.png)
+
+#### 2024.7.27 查看在线用户
+
+![image-20240727183125190](images/image-20240727183125190.png)
+
+#### 2024.7.28 搜索用户
+
+![image-20240728121127702](images/image-20240728121127702.png)
+
+#### 2024.7.28 添加好友
+
+![image-20240728143751367](images/image-20240728143751367.png)
+
 ### 2.6 服务端开发
 
 #### 2024.7.24 服务器实现流程
@@ -103,6 +122,8 @@ sqlite> create table friendInfo(id integer not null,
 ![image-20240724132651610](images/image-20240724132651610.png)
 
 - 单例模式
+
+单例模式下成员也是单例的
 
 ![image-20240724133019956](images/image-20240724133019956.png)
 
@@ -126,6 +147,38 @@ sqlite> create table friendInfo(id integer not null,
 
 ![image-20240725103142187](images/image-20240725103142187.png)
 
+#### 2024.7.25 socket收发
+
+![image-20240725164058254](images/image-20240725164058254.png)
+
+每个socket负责一条与服务端的信道
+
+![image-20240725163933346](images/image-20240725163933346.png)
+
+#### 2024.7.26 发出下线信号
+
+socket中的定义：
+
+![image-20240726151127963](images/image-20240726151127963.png)
+
+发出信号
+
+![image-20240726151246032](images/image-20240726151246032.png)
+
+在mytcpserver类关联信号槽
+
+![image-20240726151450792](images/image-20240726151450792.png)
+
+![image-20240726152251475](images/image-20240726152251475.png)
+
+槽函数处理
+
+![image-20240726155752324](images/image-20240726155752324.png)
+
+解决下线报错 deleteLater()
+
+![image-20240726163124906](images/image-20240726163124906.png)
+
 ### 2.7 柔性数组
 
 int d[] 不占空间
@@ -133,3 +186,7 @@ int d[] 不占空间
 ![image-20240724140635773](images/image-20240724140635773.png)
 
 ![image-20240724141348628](images/image-20240724141348628.png)
+
+## TODO
+
+- 服务器关闭时，应该设置所有online为0

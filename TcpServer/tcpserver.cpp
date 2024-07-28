@@ -1,6 +1,5 @@
 #include "tcpserver.h"
 #include "ui_tcpserver.h"
-#include "mytcpserver.h"
 #include <QFile>
 #include <QByteArray>
 #include <QDebug>
