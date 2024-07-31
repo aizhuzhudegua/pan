@@ -21,6 +21,7 @@ SOURCES += \
     main.cpp \
     oline.cpp \
     opewidget.cpp \
+    privatechat.cpp \
     protocol.cpp \
     tcpclient.cpp
 
@@ -29,11 +30,13 @@ HEADERS += \
     friend.h \
     oline.h \
     opewidget.h \
+    privatechat.h \
     protocol.h \
     tcpclient.h
 
 FORMS += \
     oline.ui \
+    privatechat.ui \
     tcpclient.ui
 
 # Default rules for deployment.

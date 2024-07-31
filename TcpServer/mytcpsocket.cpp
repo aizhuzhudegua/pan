@@ -216,7 +216,7 @@ void MyTcpSocket::recvMsg()
         char caMyFriendName[32] = {'\0'};
         memcpy(caMyselfName,pdu->caData,32);
         memcpy(caMyFriendName,pdu->caData+32,32);
-        qDebug() << "handle：" << caMyFriendName;
+
         bool ret = OpeDB::getInstance().handleDelFriend(caMyselfName,caMyFriendName);
         if( ret ){
             // 给发送方的回复
@@ -229,6 +229,15 @@ void MyTcpSocket::recvMsg()
             // 给好友的通知
             MyTcpServer::getInstance().resend(caMyFriendName,pdu);
         }
+        break;
+    }
+    case ENUM_MSG_TYPE_PRIVATE_CHAT_REQUEST:
+    {
+
+        char caMyFriendName[32] = {'\0'};
+        memcpy(caMyFriendName,pdu->caData+32,32);
+        qDebug() << caMyFriendName;
+        MyTcpServer::getInstance().resend(caMyFriendName,pdu);
         break;
     }
     default:

@@ -119,6 +119,14 @@ sqlite> create table friendInfo(id integer not null,
 
 ![image-20240731095826689](images/image-20240731095826689.png)
 
+#### 2024.7.31 私聊
+
+![image-20240731143015165](images/image-20240731143015165.png)
+
+客户端B收到聊天信息之后要设置聊天对象为发送方
+
+![image-20240731155327428](images/image-20240731155327428.png)
+
 ### 2.6 服务端开发
 
 #### 2024.7.24 服务器实现流程
