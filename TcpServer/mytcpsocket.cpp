@@ -194,6 +194,43 @@ void MyTcpSocket::recvMsg()
         MyTcpServer::getInstance().resend(caName,pdu);
         break;
     }
+    case ENUM_MSG_TYPE_FLUSH_FRIEND_REQUEST:
+    {
+        char caName[32] = {'\0'};
+        strncpy(caName,pdu->caData,32);
+        QStringList ret = OpeDB::getInstance().handleFlushFriend(caName);
+        uint uiMsgLen = ret.size()*32;
+        PDU *respdu = mkPDU(uiMsgLen);
+        respdu->uiMsgType = ENUM_MSG_TYPE_FLUSH_FRIEND_RESPOND;
+        for(int i=0;i<ret.size();i ++){
+            memcpy((char*)(respdu->caMsg)+i*32,ret[i].toStdString().c_str(),ret[i].size());
+        }
+        write((char*)respdu, respdu->uiPDULen);
+        free(respdu);
+        respdu = NULL;
+        break;
+    }
+    case ENUM_MSG_TYPE_DEL_FRIEND_REQUEST:
+    {
+        char caMyselfName[32] = {'\0'};
+        char caMyFriendName[32] = {'\0'};
+        memcpy(caMyselfName,pdu->caData,32);
+        memcpy(caMyFriendName,pdu->caData+32,32);
+        qDebug() << "handle：" << caMyFriendName;
+        bool ret = OpeDB::getInstance().handleDelFriend(caMyselfName,caMyFriendName);
+        if( ret ){
+            // 给发送方的回复
+            PDU* respdu = mkPDU(0);
+            respdu->uiMsgType = ENUM_MSG_TYPE_DEL_FRIEND_RESPOND;
+            strcpy(respdu->caData,DELETE_FRIEND_OK);
+            write((char*)respdu,respdu->uiPDULen);
+            free(respdu);
+            respdu=NULL;
+            // 给好友的通知
+            MyTcpServer::getInstance().resend(caMyFriendName,pdu);
+        }
+        break;
+    }
     default:
         break;
     }

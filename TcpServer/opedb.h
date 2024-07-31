@@ -22,6 +22,8 @@ public:
     int handleSearchUsr(const char* name);
     int handleAddFriend(const char*pername, const char *name);
     bool handleAgreeFriend(const char*pername, const char *name);
+    QStringList handleFlushFriend(const char *name);
+    bool handleDelFriend(const char*name, const char *friendName);
 
 signals:
 

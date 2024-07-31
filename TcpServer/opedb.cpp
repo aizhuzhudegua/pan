@@ -149,6 +149,7 @@ int OpeDB::handleAddFriend(const char *pername, const char *name)
             return 3; // 不存在用户
         }
     }
+    return -1;
 }
 
 bool OpeDB::handleAgreeFriend(const char *pername, const char *name)
@@ -157,6 +158,35 @@ bool OpeDB::handleAgreeFriend(const char *pername, const char *name)
         return false;
     }
     QString data = QString("insert into friend values((select id from usrInfo where name = '%1'),(select id from usrInfo where name = '%2'))").arg(name).arg(pername);
+    qDebug() << data;
+    QSqlQuery query;
+    return query.exec(data);
+}
+
+QStringList OpeDB::handleFlushFriend(const char *name)
+{
+    QStringList strFriendList;
+    strFriendList.clear();
+    if(NULL == name){
+        return strFriendList;
+    }
+    QString data = QString("select name from usrInfo where online =1 and (id in (select friendId from friend where id = (select id from usrInfo where name = '%1')) or id in (select id from friend where friendId = (select id from usrInfo where name = '%1')))").arg(name);
+    qDebug() << data;
+    QSqlQuery query;
+    query.exec(data);
+    while(query.next()){
+        strFriendList.append(query.value(0).toString());
+        qDebug() << query.value(0).toString();
+    }
+    return strFriendList;
+}
+
+bool OpeDB::handleDelFriend(const char *name, const char *friendName)
+{
+    if(NULL == name || NULL == friendName){
+        return false;
+    }
+    QString data = QString("delete from friend where id=(select id from usrInfo where name='%1') and friendId=(select id from usrInfo where name='%2') or id=(select id from usrInfo where name='%2') and friendId=(select id from usrInfo where name='%1')").arg(name).arg(friendName);
     qDebug() << data;
     QSqlQuery query;
     return query.exec(data);

@@ -163,6 +163,24 @@ void TcpClient::recvMsg()
         QMessageBox::information(this,"添加好友",QString("%1 refuse you request").arg(caPerName));
         break;
     }
+    case ENUM_MSG_TYPE_FLUSH_FRIEND_RESPOND:
+    {
+        OpeWidget::getInstance().getFrient()->updateFriendList(pdu);
+        break;
+    }
+    // 这是服务器转发过来的提示
+    case ENUM_MSG_TYPE_DEL_FRIEND_REQUEST:
+    {
+        char caFriendName[32] = {'\0'};
+        memcpy(caFriendName,pdu->caData,32);
+        QMessageBox::information(this,"删除好友",QString("%1 已将你从好友列表中删除").arg(caFriendName));
+        break;
+    }
+    case ENUM_MSG_TYPE_DEL_FRIEND_RESPOND:
+    {
+        QMessageBox::information(this,"删除好友",pdu->caData);
+        break;
+    }
     default:
         break;
     }

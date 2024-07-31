@@ -43,11 +43,17 @@ Friend::Friend(QWidget *parent) : QWidget(parent)
 
     setLayout(pMain);
 
-    connect(m_pShowOnlineUsrPB,SIGNAL(clicked(bool)),
-            this,SLOT(showOnline()));
+    connect(m_pShowOnlineUsrPB,SIGNAL(clicked(bool))
+            ,this,SLOT(showOnline()));
 
-    connect(m_pSearchUsrPB,SIGNAL(clicked())
+    connect(m_pSearchUsrPB,SIGNAL(clicked(bool))
             ,this,SLOT(searchUsr()));
+
+    connect(m_pFlushFriendPB,SIGNAL(clicked(bool))
+            ,this,SLOT(flushFriend()));
+
+    connect(m_pDelFriendPB,SIGNAL(clicked(bool))
+            ,this,SLOT(delFriend()));
 }
 
 void Friend::showAllOnlineUsr(PDU *pdu)
@@ -56,6 +62,19 @@ void Friend::showAllOnlineUsr(PDU *pdu)
         return;
     }
     m_pOnline->showUsr(pdu);
+}
+
+void Friend::updateFriendList(PDU *pdu)
+{
+    if(NULL == pdu){
+        return;
+    }
+    uint uiSize = pdu->uiMsgLen/32;
+    char caName[32] = {'\0'};
+    for (uint i=0; i<uiSize; i++) {
+        memcpy(caName,(char*)(pdu->caMsg)+i*32,32);
+        m_pFriendListWidget->addItem(caName);
+    }
 }
 
 void Friend::showOnline()
@@ -89,4 +108,33 @@ void Friend::searchUsr()
         pdu = NULL;
     }
 
+}
+
+void Friend::flushFriend()
+{
+    QString strName = TcpClient::getInstance().getLoginName();
+    PDU *pdu = mkPDU(0);
+    pdu->uiMsgType = ENUM_MSG_TYPE_FLUSH_FRIEND_REQUEST;
+    memcpy(pdu->caData,strName.toStdString().c_str(),strName.size());
+    TcpClient::getInstance().getTcpSocket().write((char*)pdu,pdu->uiPDULen);
+    free(pdu);
+    pdu = NULL;
+}
+
+void Friend::delFriend()
+{
+    if(NULL != m_pFriendListWidget->currentItem()){
+        QString strFriendName = m_pFriendListWidget->currentItem()->text();
+
+        PDU *pdu = mkPDU(0);
+        pdu->uiMsgType = ENUM_MSG_TYPE_DEL_FRIEND_REQUEST;
+        QString strSelfName = TcpClient::getInstance().getLoginName();
+
+        memcpy(pdu->caData,strSelfName.toStdString().c_str(),strSelfName.size());
+        memcpy(pdu->caData+32,strFriendName.toStdString().c_str(),strFriendName.size());
+        qDebug() << pdu->caData;
+        TcpClient::getInstance().getTcpSocket().write((char*)pdu,pdu->uiPDULen);
+        free(pdu);
+        pdu = NULL;
+    }
 }

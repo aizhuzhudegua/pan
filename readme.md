@@ -111,6 +111,14 @@ sqlite> create table friendInfo(id integer not null,
 
 ![image-20240728143751367](images/image-20240728143751367.png)
 
+#### 2024.7.29 刷新好友
+
+![image-20240729141528416](images/image-20240729141528416.png)
+
+#### 2024.7.31 删除好友
+
+![image-20240731095826689](images/image-20240731095826689.png)
+
 ### 2.6 服务端开发
 
 #### 2024.7.24 服务器实现流程
