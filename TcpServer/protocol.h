@@ -22,7 +22,12 @@ typedef unsigned int uint;
 #define ADD_FRIEND_OFFLINE "usr offline"
 #define ADD_FRIEND_NOT_EXIST "usr not exist"
 
+// 群聊
 #define DELETE_FRIEND_OK "delete friend ok"
+// 文件夹操作
+#define DIR_NOT_EXIST "cur dir not exist"
+#define DIR_NAME_EXIST "file name exist"
+#define CREATE_DIR_OK "create dir ok"
 
 enum ENUM_MSG_TYPE
 {
@@ -53,6 +58,12 @@ enum ENUM_MSG_TYPE
 
     ENUM_MSG_TYPE_PRIVATE_CHAT_REQUEST, // 私聊请求
     ENUM_MSG_TYPE_PRIVATE_CHAT_RESPOND, // 私聊回复
+
+    ENUM_MSG_TYPE_GROUP_CHAT_REQUEST, // 群聊请求
+    ENUM_MSG_TYPE_GROUP_CHAT_RESPOND, // 群聊回复
+
+    ENUM_MSG_TYPE_CREATE_DIR_REQUEST, // 创建文件夹请求
+    ENUM_MSG_TYPE_CREATE_DIR_RESPOND, // 创建文件夹回复
 //    ENUM_MSG_TYPE_REQUEST,
 //    ENUM_MSG_TYPE_RESPOND,
 //    ENUM_MSG_TYPE_REQUEST,

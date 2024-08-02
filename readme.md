@@ -127,6 +127,20 @@ sqlite> create table friendInfo(id integer not null,
 
 ![image-20240731155327428](images/image-20240731155327428.png)
 
+#### 2024.7.31 群聊
+
+![image-20240731202654525](images/image-20240731202654525.png)
+
+#### 2024.8.1 文件操作
+
+界面
+
+![image-20240801213936500](images/image-20240801213936500.png)
+
+创建文件夹
+
+![image-20240801215832337](images/image-20240801215832337.png)
+
 ### 2.6 服务端开发
 
 #### 2024.7.24 服务器实现流程

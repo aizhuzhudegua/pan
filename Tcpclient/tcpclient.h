@@ -20,7 +20,7 @@ public:
     ~TcpClient();
     void loadConfig();
     QString getLoginName();
-
+    QString getCurPath();
 
 // 槽函数，信号处理
 public slots:
@@ -47,5 +47,7 @@ private:
     QTcpSocket m_tcpSocket;
     // 登录者的用户名
     QString m_strLoginName;
+    // 当前所在路径
+    QString m_strCurPath;
 };
 #endif // TCPCLIENT_H
