@@ -28,6 +28,19 @@ typedef unsigned int uint;
 #define DIR_NOT_EXIST "cur dir not exist"
 #define DIR_NAME_EXIST "file name exist"
 #define CREATE_DIR_OK "create dir ok"
+#define DEL_DIR_OK "delete dir ok"
+#define Del_DIR_FAILURED "delete dir failed: is reguler file"
+// 重命名
+#define RENAME_FILE_OK "rename file ok"
+#define RENAME_FILE_FAILUERD "rename file failured"
+
+#define ENTER_DIR_FAILURED "enter dir failured: is a regular file"
+
+struct FileInfo
+{
+    char caName[32]; // 文件名
+    int iFileType;   // 文件类型
+};
 
 enum ENUM_MSG_TYPE
 {
@@ -64,14 +77,19 @@ enum ENUM_MSG_TYPE
 
     ENUM_MSG_TYPE_CREATE_DIR_REQUEST, // 创建文件夹请求
     ENUM_MSG_TYPE_CREATE_DIR_RESPOND, // 创建文件夹回复
-//    ENUM_MSG_TYPE_REQUEST,
-//    ENUM_MSG_TYPE_RESPOND,
-//    ENUM_MSG_TYPE_REQUEST,
-//    ENUM_MSG_TYPE_RESPOND,
-//    ENUM_MSG_TYPE_REQUEST,
-//    ENUM_MSG_TYPE_RESPOND,
-//    ENUM_MSG_TYPE_REQUEST,
-//    ENUM_MSG_TYPE_RESPOND,
+
+    ENUM_MSG_TYPE_FLUSH_FILE_REQUEST, // 刷新文件请求
+    ENUM_MSG_TYPE_FLUSH_FILE_RESPOND, // 刷新文件回复
+
+    ENUM_MSG_TYPE_DEL_DIR_REQUEST, // 删除目录请求
+    ENUM_MSG_TYPE_DEL_DIR_RESPOND, // 删除目录回复
+
+    ENUM_MSG_TYPE_RENAME_FILE_REQUEST, // 重命名文件请求
+    ENUM_MSG_TYPE_RENAME_FILE_RESPOND, // 重命名文件回复
+
+    ENUM_MSG_TYPE_ENTER_DIR_REQUEST, // 进入文件夹请求
+    ENUM_MSG_TYPE_ENTER_DIR_RESPOND, // 进入文件夹回复
+
     ENUM_MSG_TYPE_MAX=0x00ffffff
 };
 

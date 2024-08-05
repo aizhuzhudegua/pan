@@ -16,10 +16,11 @@ TcpClient::TcpClient(QWidget *parent)
     resize(500,250);
 
     loadConfig();
-
+    // 关联成功连接的信号
     connect(&m_tcpSocket,SIGNAL(connected()),this,SLOT(showConnect()));
-    // 关联m_tcpSocket发出的读信号
+    // 关联可读信号
     connect(&m_tcpSocket,SIGNAL(readyRead()),this,SLOT(recvMsg()));
+
 
     // 连接服务器
     m_tcpSocket.connectToHost(QHostAddress(m_strIP),m_usPort);
@@ -68,6 +69,7 @@ void TcpClient::showConnect()
 {
     QMessageBox::information(this,"连接服务器","连接服务器成功");
 }
+
 
 void TcpClient::recvMsg()
 {
@@ -208,6 +210,35 @@ void TcpClient::recvMsg()
     case ENUM_MSG_TYPE_CREATE_DIR_RESPOND:
     {
         QMessageBox::information(this,"创建文件夹",pdu->caData);
+        break;
+    }
+    case ENUM_MSG_TYPE_FLUSH_FILE_RESPOND:
+    {
+        OpeWidget::getInstance().getBook()->updateFileList(pdu);
+        QString strEnterDir = OpeWidget::getInstance().getBook()->getEnterDir();
+        if(!strEnterDir.isEmpty()){
+            m_strCurPath = m_strCurPath +"/"+ strEnterDir;
+            qDebug() << "enter dir:" << m_strCurPath;
+            // 成功进入文件夹之后需要清除EnterDir，避免重复拼接
+            OpeWidget::getInstance().getBook()->clearEnterDir();
+        }
+        break;
+    }
+    case ENUM_MSG_TYPE_DEL_DIR_RESPOND:
+    {
+        QMessageBox::information(this,"删除文件夹",pdu->caData);
+        break;
+    }
+    case ENUM_MSG_TYPE_RENAME_FILE_RESPOND:
+    {
+        QMessageBox::information(this,"重命名文件",pdu->caData);
+        break;
+    }
+    case ENUM_MSG_TYPE_ENTER_DIR_RESPOND:
+    {
+        // 成功进入文件夹失败也要清除EnterDir，避免刷新文件夹时重复拼接
+        OpeWidget::getInstance().getBook()->clearEnterDir();
+        QMessageBox::information(this,"进入文件夹",pdu->caData);
         break;
     }
     default:

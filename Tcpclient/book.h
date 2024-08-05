@@ -13,9 +13,16 @@ class Book : public QWidget
     Q_OBJECT
 public:
     explicit Book(QWidget *parent = nullptr);
+    void updateFileList(PDU *pdu);
 
 public slots:
     void createDir();
+    void flushFile();
+    void delDir();
+    void renameFile();
+    void enterDir(const QModelIndex &index);
+    void clearEnterDir();
+    QString getEnterDir();
 
 signals:
 
@@ -31,7 +38,7 @@ private:
     QPushButton *m_pDelFilePB;
     QPushButton *m_pShareFilePB;
 
-
+    QString m_strEnterDir;
 };
 
 #endif // BOOK_H

@@ -2,6 +2,7 @@
 #include <QDebug>
 #include "mytcpserver.h"
 #include <QDir>
+#include <QFileInfoList>
 
 MyTcpSocket::MyTcpSocket()
 {
@@ -300,6 +301,174 @@ void MyTcpSocket::recvMsg()
         write((char*) respdu,respdu->uiPDULen);
         free(respdu);
         respdu = NULL;
+        break;
+    }
+    case ENUM_MSG_TYPE_FLUSH_FILE_REQUEST:
+    {
+        char *pCurPath = new char[pdu->uiMsgLen];
+        memcpy(pCurPath,pdu->caMsg,pdu->uiMsgLen);
+        QDir dir(pCurPath);
+        QFileInfoList fileInfoList = dir.entryInfoList();
+        int iFileCount = fileInfoList.size();
+        PDU *respdu = mkPDU((iFileCount)*sizeof(FileInfo));
+        respdu->uiMsgType = ENUM_MSG_TYPE_FLUSH_FILE_RESPOND;
+        FileInfo *pFileInfo = NULL;
+        QString strFileName;
+        for(int i=0;i<iFileCount;i++)
+        {
+
+            // 指向每一个FileInfo
+            pFileInfo = (FileInfo*)respdu->caMsg + i;
+            strFileName = fileInfoList[i].fileName();
+            memcpy(pFileInfo->caName,strFileName.toStdString().c_str(),strFileName.size());
+
+
+            if(fileInfoList[i].isDir()){
+                pFileInfo->iFileType = 0;
+            }
+            if(fileInfoList[i].isFile()){
+                pFileInfo->iFileType = 1;
+            }
+            qDebug() << fileInfoList[i].fileName()
+                     << fileInfoList[i].size()
+                     << " 文件夹：" << fileInfoList[i].isDir()
+                     << " 常规文件：" <<  fileInfoList[i].isFile()
+                     << pFileInfo->iFileType
+                     << pFileInfo->caName;
+        }
+        write((char*) respdu,respdu->uiPDULen);
+        free(respdu);
+        respdu = NULL;
+        break;
+    }
+    case ENUM_MSG_TYPE_DEL_DIR_REQUEST:
+    {
+        char caName[32] = {'\0'};
+        strcpy(caName,pdu->caData);
+        char *pPath = new char[pdu->uiMsgLen];
+        memcpy(pPath,pdu->caMsg,pdu->uiMsgLen);
+        QString strPath = QString("%1/%2").arg(pPath).arg(caName);
+        qDebug() << strPath;
+
+        QFileInfo fileInfo(strPath);
+        bool ret = false;
+        if(fileInfo.isDir())
+        {
+            QDir dir;
+            dir.setPath(strPath);
+            // 递归删除
+            ret = dir.removeRecursively();
+        }
+        else if(fileInfo.isFile())  // 常规文件不删除
+        {
+            ret = false;
+        }
+        PDU *respdu = mkPDU(0);
+        respdu->uiMsgType=ENUM_MSG_TYPE_DEL_DIR_RESPOND;
+        if(ret)
+        {
+            memcpy(respdu->caData,DEL_DIR_OK,strlen(DEL_DIR_OK));
+        }
+        else
+        {
+            memcpy(respdu->caData,Del_DIR_FAILURED,strlen(Del_DIR_FAILURED));
+        }
+        write((char*) respdu,respdu->uiPDULen);
+        free(respdu);
+        respdu = NULL;
+        break;
+    }
+    case ENUM_MSG_TYPE_RENAME_FILE_REQUEST:
+    {
+        char caOldName[32] = {'\0'};
+        char caNewName[32] = {'\0'};
+        strncpy(caOldName,pdu->caData,32);
+        strncpy(caNewName,pdu->caData+32,32);
+
+        char *pPath = new char[pdu->uiMsgLen];
+        strncpy(pPath,(char*)pdu->caMsg,pdu->uiMsgLen);
+
+        QString OldPath = QString("%1/%2").arg(pPath).arg(caOldName);
+        QString NewPath = QString("%1/%2").arg(pPath).arg(caNewName);
+
+        qDebug() << OldPath;
+        qDebug() << NewPath;
+
+        QDir dir;
+        bool ret = dir.rename(OldPath,NewPath);
+        PDU *respdu = mkPDU(0);
+        respdu->uiMsgType = ENUM_MSG_TYPE_RENAME_FILE_RESPOND;
+        if(ret)
+        {
+            strcpy(respdu->caData,RENAME_FILE_OK);
+        }
+        else
+        {
+            strcpy(respdu->caData,RENAME_FILE_FAILUERD);
+        }
+        write((char*) respdu,respdu->uiPDULen);
+        free(respdu);
+        respdu = NULL;
+        break;
+    }
+    case ENUM_MSG_TYPE_ENTER_DIR_REQUEST:
+    {
+        char caName[32] = {'\0'};
+        strncpy(caName,pdu->caData,32);
+
+        char *pPath = new char[pdu->uiMsgLen];
+        strncpy(pPath,(char*)pdu->caMsg,pdu->uiMsgLen);
+
+        QString strPath = QString("%1/%2").arg(pPath).arg(caName);
+
+        QFileInfo fileInfo(strPath);
+
+        if(fileInfo.isDir())
+        {
+            QDir dir(strPath);
+            QFileInfoList fileInfoList = dir.entryInfoList();
+            int iFileCount = fileInfoList.size();
+            PDU *respdu = mkPDU((iFileCount)*sizeof(FileInfo));
+            respdu->uiMsgType = ENUM_MSG_TYPE_FLUSH_FILE_RESPOND;
+            FileInfo *pFileInfo = NULL;
+            QString strFileName;
+            for(int i=0;i<iFileCount;i++)
+            {
+
+                // 指向每一个FileInfo
+                pFileInfo = (FileInfo*)respdu->caMsg + i;
+                strFileName = fileInfoList[i].fileName();
+                memcpy(pFileInfo->caName,strFileName.toStdString().c_str(),strFileName.size());
+
+
+                if(fileInfoList[i].isDir()){
+                    pFileInfo->iFileType = 0;
+                }
+                if(fileInfoList[i].isFile()){
+                    pFileInfo->iFileType = 1;
+                }
+                qDebug() << fileInfoList[i].fileName()
+                         << fileInfoList[i].size()
+                         << " 文件夹：" << fileInfoList[i].isDir()
+                         << " 常规文件：" <<  fileInfoList[i].isFile()
+                         << pFileInfo->iFileType
+                         << pFileInfo->caName;
+            }
+            write((char*) respdu,respdu->uiPDULen);
+            free(respdu);
+            respdu = NULL;
+        }
+        else if(fileInfo.isFile())
+        {
+            PDU *respdu = mkPDU(0);
+            respdu->uiMsgType = ENUM_MSG_TYPE_ENTER_DIR_RESPOND;
+            strcpy(respdu->caData,ENTER_DIR_FAILURED);
+
+            write((char*) respdu,respdu->uiPDULen);
+            free(respdu);
+            respdu = NULL;
+        }
+
         break;
     }
     default:

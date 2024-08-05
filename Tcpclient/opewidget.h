@@ -14,6 +14,7 @@ public:
     explicit OpeWidget(QWidget *parent = nullptr);
     static OpeWidget &getInstance();
     Friend *getFrient();
+    Book *getBook();
 
 signals:
 
