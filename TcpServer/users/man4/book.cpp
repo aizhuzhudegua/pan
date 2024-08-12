@@ -3,8 +3,6 @@
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QFileDialog>
-#include "opewidget.h"
-#include "sharefile.h"
 
 Book::Book(QWidget *parent) : QWidget(parent)
 {
@@ -62,8 +60,6 @@ Book::Book(QWidget *parent) : QWidget(parent)
             ,this,SLOT(delRegFile()));
     connect(m_pDownloadPB,SIGNAL(clicked(bool))
             ,this,SLOT(downloadFile()));
-    connect(m_pShareFilePB,SIGNAL(clicked(bool))
-            ,this,SLOT(shareFile()));
 
     m_bDownload = false;
 }
@@ -342,7 +338,7 @@ void Book::downloadFile()
     }
     else
     {
-        QString strSaveFilePath = QFileDialog::getSaveFileUrl().toLocalFile();
+        QString strSaveFilePath = QFileDialog::getSaveFileUrl().toString();
         if(strSaveFilePath.isEmpty())
         {
             QMessageBox::warning(this,"下载文件","请指定要保存的位置");
@@ -352,7 +348,7 @@ void Book::downloadFile()
         {
             m_strSaveFilePath = strSaveFilePath;
         }
-
+        qDebug() << m_strSaveFilePath;
         if(!m_strSaveFilePath.isEmpty())
         {
             PDU *pdu = mkPDU(strCurPath.size()+1);
@@ -367,23 +363,6 @@ void Book::downloadFile()
 
     }
 
-}
-
-// 按钮事件
-void Book::shareFile()
-{
-    //刷新好友列表
-    Friend *pFriend = OpeWidget::getInstance().getFrient();
-    // 这里是异步的，需要改
-    // pFriend->flushFriend();
-    QListWidget *pFriendList = pFriend->getFriendList();
-
-    // 更新到 sharefile的界面上
-    ShareFile::getInstance().updateFriend(pFriendList);
-    if(ShareFile::getInstance().isHidden())
-    {
-        ShareFile::getInstance().show();
-    }
 }
 
 void Book::clearEnterDir()

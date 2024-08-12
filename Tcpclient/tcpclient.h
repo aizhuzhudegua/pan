@@ -28,6 +28,8 @@ public slots:
     void recvMsg();
     static TcpClient &getInstance();
     QTcpSocket& getTcpSocket();
+    void setCurPath(QString strCurPath);
+
 
 private slots:
 //    void on_send_pd_clicked();
@@ -49,5 +51,7 @@ private:
     QString m_strLoginName;
     // 当前所在路径
     QString m_strCurPath;
+
+    QFile m_file;
 };
 #endif // TCPCLIENT_H

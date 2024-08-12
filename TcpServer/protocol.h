@@ -36,6 +36,13 @@ typedef unsigned int uint;
 
 #define ENTER_DIR_FAILURED "enter dir failured: is a regular file"
 
+#define UPLOAD_FILE_OK "upload file ok"
+#define UPLOAD_FILE_FAILURED "upload file failured"
+
+// 删除文件
+#define DEL_FILE_OK "delete file ok"
+#define Del_FILE_FAILURED "delete file failed: is dir"
+
 struct FileInfo
 {
     char caName[32]; // 文件名
@@ -89,6 +96,15 @@ enum ENUM_MSG_TYPE
 
     ENUM_MSG_TYPE_ENTER_DIR_REQUEST, // 进入文件夹请求
     ENUM_MSG_TYPE_ENTER_DIR_RESPOND, // 进入文件夹回复
+
+    ENUM_MSG_TYPE_UPLOAD_FILE_REQUEST, // 上传文件请求
+    ENUM_MSG_TYPE_UPLOAD_FILE_RESPOND, // 上传文件回复
+
+    ENUM_MSG_TYPE_DEL_FILE_REQUEST, // 删除常规文件请求
+    ENUM_MSG_TYPE_DEL_FILE_RESPOND, // 删除常规文件回复
+
+    ENUM_MSG_TYPE_DOWLOAD_FILE_REQUEST, // 下载文件请求
+    ENUM_MSG_TYPE_DOWLOAD_FILE_RESPOND, // 下载文件回复
 
     ENUM_MSG_TYPE_MAX=0x00ffffff
 };

@@ -4,6 +4,8 @@
 #include <QTcpSocket>
 #include "protocol.h"
 #include "opedb.h"
+#include <QFile>
+#include <QTimer>
 
 class MyTcpSocket : public QTcpSocket
 {
@@ -18,9 +20,17 @@ signals:
 public slots:
     void recvMsg();
     void clientOffLine();
+    void sendFileToClient();
 
 private:
     QString m_strName;
+
+    QFile m_file;
+    qint64 m_iTotal;
+    qint64 m_iReceive;
+    bool m_bUpload;
+
+    QTimer *m_pTimer;
 };
 
 #endif // MYTCPSOCKET_H
