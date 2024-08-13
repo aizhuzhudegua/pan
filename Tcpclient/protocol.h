@@ -44,6 +44,11 @@ typedef unsigned int uint;
 #define DEL_FILE_OK "delete file ok"
 #define Del_FILE_FAILURED "delete file failed: is dir"
 
+// 移动文件
+#define MOVE_FILE_OK "move file ok"
+#define MOVE_FILE_FAILURED "move file failed: is a regular file"
+#define COMMON_ERR "operate failed: system is busy"
+
 struct FileInfo
 {
     char caName[32]; // 文件名
@@ -106,6 +111,15 @@ enum ENUM_MSG_TYPE
 
     ENUM_MSG_TYPE_DOWLOAD_FILE_REQUEST, // 下载文件请求
     ENUM_MSG_TYPE_DOWLOAD_FILE_RESPOND, // 下载文件回复
+
+    ENUM_MSG_TYPE_SHARE_FILE_REQUEST, // 共享文件请求
+    ENUM_MSG_TYPE_SHARE_FILE_RESPOND, // 共享文件回复
+
+    ENUM_MSG_TYPE_SHARE_FILE_NOTE, // 共享文件通知
+    ENUM_MSG_TYPE_SHARE_FILE_NOTE_RESPOND, // 共享文件通知
+
+    ENUM_MSG_TYPE_MOVE_FILE_REQUEST, // 移动文件请求
+    ENUM_MSG_TYPE_MOVE_FILE_RESPOND, // 移动文件回复
 
     ENUM_MSG_TYPE_MAX=0x00ffffff
 };

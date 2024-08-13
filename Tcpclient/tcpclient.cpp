@@ -85,6 +85,7 @@ void TcpClient::recvMsg()
         // 将uiPDULen字段之后的所有数据读入
         m_tcpSocket.read((char*)pdu+sizeof(uint),uiPDULen-sizeof(uint));
 
+
         switch (pdu->uiMsgType) {
         case ENUM_MSG_TYPE_REGIST_RESPOND:
         {
@@ -274,6 +275,44 @@ void TcpClient::recvMsg()
                 }
 
             }
+            break;
+        }
+        case ENUM_MSG_TYPE_SHARE_FILE_RESPOND:
+        {
+            QMessageBox::information(this,"共享文件",pdu->caData);
+            break;
+        }
+        case ENUM_MSG_TYPE_SHARE_FILE_NOTE:
+        {
+
+            char *pPath = new char[pdu->uiMsgLen];
+            memcpy(pPath,pdu->caMsg,pdu->uiMsgLen);
+            // 取出文件名
+            qDebug() << "pPath:"<<pPath;
+            char *pos = strrchr(pPath,'/');
+            if(NULL != pos)
+            {
+                pos++;
+                QString strNote = QString("%1 share file: %2 \n receive or not").arg(pdu->caData).arg(pos);
+                int ret = QMessageBox::question(this,"共享文件",strNote);
+                if(QMessageBox::Yes == ret)
+                {
+                    PDU *respdu = mkPDU(pdu->uiMsgLen);
+                    respdu->uiMsgType = ENUM_MSG_TYPE_SHARE_FILE_NOTE_RESPOND;
+                    memcpy(respdu->caMsg,pdu->caMsg,pdu->uiMsgLen);
+                    QString strName = m_strLoginName;
+                    strcpy(respdu->caData,strName.toStdString().c_str());
+                    m_tcpSocket.write((char*)respdu,respdu->uiPDULen);
+                    free(respdu);
+                    respdu = NULL;
+                }
+            }
+            delete []pPath;
+            break;
+        }
+        case ENUM_MSG_TYPE_MOVE_FILE_RESPOND:
+        {
+            QMessageBox::information(this,"移动文件",pdu->caData);
             break;
         }
         default:

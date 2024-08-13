@@ -24,10 +24,45 @@ QString MyTcpSocket::getName()
     return m_strName;
 }
 
+void MyTcpSocket::copyDir(QString strSrcDir, QString strDestDir)
+{
+    QDir dir;
+    dir.mkdir(strDestDir);
+
+    dir.setPath(strSrcDir);
+    QFileInfoList fileInfoList = dir.entryInfoList();
+
+    QString srcTmp;
+    QString destTmp;
+    for(int i=0;i<fileInfoList.size();i++)
+    {
+        qDebug() << "fileName: " << fileInfoList[i].fileName();
+        if(fileInfoList[i].isFile())
+        {
+            srcTmp = strSrcDir + '/' + fileInfoList[i].fileName();
+            destTmp = strDestDir + '/' + fileInfoList[i].fileName();
+            QFile::copy(srcTmp,destTmp);
+        }
+        else if(fileInfoList[i].isDir())
+        {
+            if(fileInfoList[i].fileName() == QString(".") ||
+                    fileInfoList[i].fileName() == QString(".."))
+            {
+                continue;
+            }
+            srcTmp = strSrcDir + '/' + fileInfoList[i].fileName();
+            destTmp = strDestDir + '/' + fileInfoList[i].fileName();
+            // 递归拷贝
+            copyDir(srcTmp,destTmp);
+        }
+    }
+}
+
 void MyTcpSocket::recvMsg()
 {
     if(!m_bUpload)
     {
+
         qDebug() << this->bytesAvailable();
         uint uiPDULen = 0;
         // 传入的是一个起始地址，并且是char*型，一次偏移一个字节
@@ -36,7 +71,7 @@ void MyTcpSocket::recvMsg()
         PDU *pdu = mkPDU(uiMsgLen);
         // 将uiPDULen字段之后的所有数据读入
         this->read((char*)pdu+sizeof(uint),uiPDULen-sizeof(uint));
-
+        qDebug() << "mytcpsocket:40 " << pdu->uiMsgType;
         PDU *respdu;
         switch (pdu->uiMsgType) {
         case ENUM_MSG_TYPE_REGIST_REQUEST:
@@ -563,6 +598,105 @@ void MyTcpSocket::recvMsg()
             m_file.setFileName(strPath);
             m_file.open(QIODevice::ReadOnly);
             m_pTimer->start(1000);
+            break;
+        }
+        case ENUM_MSG_TYPE_SHARE_FILE_REQUEST:
+        {
+            char caSendName[32] = {'\0'};
+            int num = 0;
+            sscanf(pdu->caData,"%s %d",caSendName,&num);
+            int size = num*32;
+
+            PDU *respdu = mkPDU(pdu->uiMsgLen-size);
+            respdu->uiMsgType = ENUM_MSG_TYPE_SHARE_FILE_NOTE;
+            strcpy(respdu->caData,caSendName);
+            memcpy(respdu->caMsg,(char*)(pdu->caMsg)+size,pdu->uiMsgLen-size);
+
+
+//            char *tmp = new char[pdu->uiMsgLen];
+//            strncpy(tmp,(char*)pdu->caMsg,pdu->uiMsgLen);
+//            QString strTmp = QString("%1").arg(tmp);
+//            qDebug() << "resend:" << strTmp;
+            char caRecvName[32] = {'\0'};
+            for(int i=0;i<num;i++)
+            {
+                memcpy(caRecvName,(char*)(pdu->caMsg) + i*32,32);
+                // qDebug() << "send to " << caRecvName;
+                MyTcpServer::getInstance().resend(caRecvName,respdu);
+            }
+            free(respdu);
+            respdu = NULL;
+
+            respdu = mkPDU(0);
+            respdu->uiMsgType = ENUM_MSG_TYPE_SHARE_FILE_RESPOND;
+            strcpy(respdu->caData,"share file ok");
+            write((char*)respdu,respdu->uiPDULen);
+            free(respdu);
+            respdu = NULL;
+
+            break;
+        }
+        case ENUM_MSG_TYPE_SHARE_FILE_NOTE_RESPOND:
+        {
+            QString strRecvPath = QString("./users/%1").arg(pdu->caData);
+
+            QString strShareFilePath = QString("%1").arg((char*)pdu->caMsg);
+            QFileInfo fileInfo(strShareFilePath);
+            int index = strShareFilePath.lastIndexOf('/');
+            QString strFileName = strShareFilePath.right(strShareFilePath.size()-index-1);
+
+            strRecvPath = strRecvPath + "/" + strFileName;
+            qDebug()<<"strRecvPath: " << strRecvPath;
+            if(fileInfo.isFile())
+            {
+                QFile::copy(strShareFilePath,strRecvPath);
+            }
+            else if(fileInfo.isDir())
+            {
+                copyDir(strShareFilePath,strRecvPath);
+            }
+            break;
+        }
+        case ENUM_MSG_TYPE_MOVE_FILE_REQUEST:
+        {
+            char caFileName[32] = {'\0'};
+            int srcLen = 0;
+            int destLen = 0;
+            sscanf(pdu->caData,"%d %d %s",&srcLen , &destLen,caFileName);
+
+            char *pSrcPath = new char[srcLen+1];
+            char *pDestPath = new char[destLen+1+32];
+            // 清空
+            memset(pSrcPath,'\0',srcLen+1);
+            memset(pDestPath,'\0',destLen+1+32);
+
+            memcpy(pSrcPath,pdu->caMsg,srcLen);
+            memcpy(pDestPath,(char*)(pdu->caMsg) + srcLen+1,destLen);
+
+            QFileInfo fileInfo(pDestPath);
+            PDU *respdu = mkPDU(0);
+            respdu->uiMsgType = ENUM_MSG_TYPE_MOVE_FILE_RESPOND;
+            if(fileInfo.isDir())
+            {
+                strcat(pDestPath,"/");
+                strcat(pDestPath,caFileName);
+                bool ret = QFile::rename(pSrcPath,pDestPath);
+                if(ret)
+                {
+                    strcpy(respdu->caData,MOVE_FILE_OK);
+                }
+                else
+                {
+                    strcpy(respdu->caData,COMMON_ERR);
+                }
+            }
+            else if(fileInfo.isFile())
+            {
+                strcpy(respdu->caData,MOVE_FILE_FAILURED);
+            }
+            write((char*)respdu,respdu->uiPDULen);
+            free(respdu);
+            respdu = NULL;
             break;
         }
         default:

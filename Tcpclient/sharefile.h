@@ -19,6 +19,14 @@ public:
     void test();
 
     void updateFriend(QListWidget *pFriendList);
+
+public slots:
+    void cancelSelect();
+    void selectAll();
+
+    void ok();
+    void cancel();
+
 signals:
 
 private:

@@ -23,6 +23,8 @@ public:
     qint64 m_iTotal;
     qint64 m_iReceived;
 
+    QString getShareFileName();
+
 public slots:
     void createDir();
     void flushFile();
@@ -36,6 +38,8 @@ public slots:
 
     void downloadFile();
     void shareFile();
+    void moveFile();
+    void selectDestDir();
 
 signals:
 
@@ -50,6 +54,8 @@ private:
     QPushButton *m_pDownloadPB;
     QPushButton *m_pDelFilePB;
     QPushButton *m_pShareFilePB;
+    QPushButton *m_pMoveFilePB;
+    QPushButton *m_pSelectDirPB;
 
     QString m_strEnterDir;
     QString m_strUploadFilePath;
@@ -58,7 +64,10 @@ private:
 
     QString m_strSaveFilePath;
     bool m_bDownload;
-
+    QString m_strShareFileName;
+    QString m_strMoveFileName;
+    QString m_strMoveFilePath;
+    QString m_strDestDir;
 };
 
 #endif // BOOK_H
